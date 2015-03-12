@@ -14,29 +14,46 @@
   rotate_wait 5
 </source>
 
+#<match docker.container.{{printf "%.*s" 12 $value.ID}}>
+#  type record_modifier
+#  tag docker.filtered.{{printf "%.*s" 12 $value.ID}}
+#  image {{ $value.Image }}
+#  host ${hostname}
+#  name {{ $logs }}
+#  env {{LOG_ENV}}
+#</match>
+
 <match docker.container.{{printf "%.*s" 12 $value.ID}}>
-    type record_modifier
-    tag docker.filtered.{{printf "%.*s" 12 $value.ID}}
-    image {{ $value.Image }}
-    host ${hostname}
-    name {{ $logs }}
-    env {{LOG_ENV}}
+  type docker_format
+  docker_containers_path /var/lib/docker/containers
+  container_id {{ $value.ID }}
+  tag docker.all
 </match>
+
 {{end}}{{ end }}
 
-<match docker.filtered.**>
-  type exclude_filter
-  key stream
-  value stdout
-  regexp false # default false, string comparison
-  add_tag_prefix stderr
+#<match docker.filtered.**>
+#  type exclude_filter
+#  key stream
+#  value stdout
+#  regexp false # default false, string comparison
+#  add_tag_prefix stderr
+#</match>
+
+<match docker.all>
+  type elasticsearch
+  host {{ .Env.ES_HOST }}
+  port {{ .Env.ES_PORT }}
+  index_name docker
+  type_name all
+  logstash_format true
 </match>
 
-<match stderr.docker.filtered.**>
-    type elasticsearch
-    host {{ .Env.ES_HOST }}
-    port {{ .Env.ES_PORT }}
-    index_name fluentd
-    type_name fluentd
-    logstash_format true
+<match docker.filtered.**>
+  type elasticsearch
+  host {{ .Env.ES_HOST }}
+  port {{ .Env.ES_PORT }}
+  index_name docker
+  type_name fluentd
+  logstash_format true
 </match>

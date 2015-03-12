@@ -9,6 +9,7 @@ RUN apt-get update \
 RUN gem install fluentd --no-ri --no-rdoc \
     && fluent-gem install fluent-plugin-elasticsearch \
     fluent-plugin-record-modifier fluent-plugin-exclude-filter \
+    fluent-plugin-docker-format \
     && mkdir /etc/fluentd/
 
 # install docker-gen

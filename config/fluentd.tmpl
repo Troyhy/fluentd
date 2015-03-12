@@ -14,15 +14,6 @@
   rotate_wait 5
 </source>
 
-#<match docker.container.{{printf "%.*s" 12 $value.ID}}>
-#  type record_modifier
-#  tag docker.filtered.{{printf "%.*s" 12 $value.ID}}
-#  image {{ $value.Image }}
-#  host ${hostname}
-#  name {{ $logs }}
-#  env {{LOG_ENV}}
-#</match>
-
 <match docker.container.{{printf "%.*s" 12 $value.ID}}>
   type docker_format
   docker_containers_path /var/lib/docker/containers
@@ -31,6 +22,14 @@
 </match>
 
 {{end}}{{ end }}
+
+<source>
+  type syslog
+  port 5140
+  bind 0.0.0.0
+  tag system
+</source>
+
 
 #<match docker.filtered.**>
 #  type exclude_filter
@@ -41,11 +40,26 @@
 #</match>
 
 <match docker.all>
+    type color_stripper
+    tag  docker.all.stripped
+    strip_fields log
+</match>
+
+<match docker.all.stripped>
   type elasticsearch
   host {{ .Env.ES_HOST }}
   port {{ .Env.ES_PORT }}
   index_name docker
-  type_name all
+  type_name stripped
+  logstash_format true
+</match>
+
+<match system.**>
+  type elasticsearch
+  host {{ .Env.ES_HOST }}
+  port {{ .Env.ES_PORT }}
+  index_name syslog
+  type_name syslog
   logstash_format true
 </match>
 

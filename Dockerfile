@@ -10,7 +10,8 @@ RUN gem install fluentd --no-ri --no-rdoc \
     && fluent-gem install fluent-plugin-elasticsearch \
     fluent-plugin-record-modifier fluent-plugin-exclude-filter \
     fluent-plugin-docker-format fluent-plugin-color-stripper \
-    fluent-plugin-parser\
+    fluent-plugin-parser fluent-plugin-multi-format-parser \
+    fluent-plugin-retag \
     && mkdir /etc/fluentd/
 
 # install docker-gen

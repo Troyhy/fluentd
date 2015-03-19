@@ -19,9 +19,12 @@ RUN cd /usr/local/bin \
     && curl -L https://github.com/jwilder/docker-gen/releases/download/0.3.7/docker-gen-linux-amd64-0.3.7.tar.gz \
     | tar -xzv
 
+VOLUME ["/app/config"]
+
 # add startup scripts and config files
 ADD ./bin    /app/bin
 ADD ./config /app/config
+
 
 WORKDIR /app
 
